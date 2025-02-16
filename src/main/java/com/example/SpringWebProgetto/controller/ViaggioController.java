@@ -1,49 +1,81 @@
 package com.example.SpringWebProgetto.controller;
 
 import com.example.SpringWebProgetto.dto.ViaggioDTO;
-import com.example.SpringWebProgetto.entity.Viaggio;
 import com.example.SpringWebProgetto.service.ViaggioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/viaggi")
+@RequestMapping("/viaggio")
 public class ViaggioController {
     @Autowired
     ViaggioService viaggioService;
 
-    // 1. - POST http://localhost:8080/viaggi/nuovoViaggio
-    @PostMapping("/nuovoViaggio")
-    @ResponseStatus(HttpStatus.CREATED) // <-- 201
-    public Viaggio nuovoViaggio(@RequestBody ViaggioDTO body) throws Exception {
-        return viaggioService.nuovoViaggio(body);
+    @PostMapping("")
+    public ResponseEntity<?> nuovoViaggio(@RequestBody @Validated ViaggioDTO viaggioDTO, BindingResult validation) {
+
+        if (validation.hasErrors()) {
+            String messaggioErrori = "ERRORE DI VALIDAZIONE \n";
+
+            for (ObjectError errore : validation.getAllErrors()) {
+                messaggioErrori += errore.getDefaultMessage() + "\n";
+            }
+            return new ResponseEntity<>(messaggioErrori, HttpStatus.BAD_REQUEST);
+        }
+
+        Long idNuovoViaggio = viaggioService.saveViaggio(viaggioDTO);
+        return new ResponseEntity<>("Viaggio inserito nel DB con id: " + idNuovoViaggio, HttpStatus.CREATED);
     }
 
-    // 2. - GET http://localhost:8080/viaggi
-    @GetMapping("/ricercaViaggi")
-    public Page<Viaggio> getViaggi(@RequestParam(defaultValue = "0") int page,
-                                   @RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sortBy) {
-        return viaggioService.getViaggi(page, size, sortBy);
+    @GetMapping(value = "", produces = "application/json")
+    public ResponseEntity<Page<ViaggioDTO>> getAllViaggi(Pageable page) {
+        Page<ViaggioDTO> viaggi = viaggioService.getAllViaggio(page);
+        return new ResponseEntity<>(viaggi, HttpStatus.OK);
     }
 
-    // 3. - GET http://localhost:8080/viaggi/{id}
     @GetMapping("/{id}")
-    public Viaggio findById(@PathVariable long id) {
-        return viaggioService.findById(id);
+    public ViaggioDTO getViaggioById(@PathVariable long id) {
+        return viaggioService.findViaggioById(id);
+
     }
 
-    // 4. - PUT http://localhost:8080/viaggi/{id}
-    @PutMapping("/{id}")
-    public Viaggio findAndUpdate(@PathVariable long id, @RequestBody Viaggio body) {
-        return viaggioService.findByIdAndUpdate(id, body);
+    @PutMapping("/modifica/{id}")
+    public ResponseEntity<?> updateViaggio(@RequestBody @Validated ViaggioDTO viaggioDTO, BindingResult validation, @PathVariable long id) {
+        if (validation.hasErrors()) {
+            String messaggioErrori = "ERRORE DI VALIDAZIONE \n";
+
+            for (ObjectError errore : validation.getAllErrors()) {
+                messaggioErrori += errore.getDefaultMessage() + "\n";
+            }
+            return new ResponseEntity<>(messaggioErrori, HttpStatus.BAD_REQUEST);
+        } else {
+            viaggioService.updateViaggio(viaggioDTO, id);
+            return new ResponseEntity<>("Il viaggio è stato modificato correttamente", HttpStatus.OK);
+        }
     }
 
-    // 5. - DELETE http://localhost:8080/viaggi/{id}
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT) // <-- 204 NO CONTENT
-    public void findAndDelete(@PathVariable long id) {
-        viaggioService.findByIdAndDelete(id);
+    @PutMapping("assegnaDipendente/{viaggioId}/{dipendenteId}")
+    public ResponseEntity<?> assegnaDipendenteAViaggio(@PathVariable long viaggioId, @PathVariable long dipendenteId) {
+        viaggioService.addDipendente(viaggioId, dipendenteId);
+        return new ResponseEntity<>("Dipendente (id:" + dipendenteId + ") aggiunto a viaggio (" + viaggioId + ")", HttpStatus.OK);
     }
+
+    @PatchMapping("modificaStato/{viaggioId}")
+    public ResponseEntity<?> modificaStatoDiViaggio(@PathVariable long viaggioId, @RequestBody String stato) {
+        viaggioService.modificaStatoViaggio(viaggioId, stato);
+        return new ResponseEntity<>("Stato del viaggio (id:" + viaggioId + ") aggiornato", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteViaggio(@PathVariable long id) {
+        return new ResponseEntity<>(viaggioService.deleteViaggio(id), HttpStatus.OK);
+    }
+
 }

@@ -5,13 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 
-@Entity
+@Entity(name = "dipendenti")
 public class Dipendente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +23,7 @@ public class Dipendente {
     private String cognome;
     @Column(nullable = false,unique = true)
     private String email;
-
-    @OneToMany
-    @JoinColumn(name = "id_dipendente")
-    private List<Prenotazioni> listaPrenotazione;
+    private String imgProfilo;
 
 
 }

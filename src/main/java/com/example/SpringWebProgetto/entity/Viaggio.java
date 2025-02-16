@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 
 @NoArgsConstructor
@@ -21,11 +20,13 @@ public class Viaggio {
     private long id;
     @Column(nullable = false)
     private String destinazione;
+
     private LocalDate dataViaggio;
     private String statoViaggio;
 
-    @OneToMany
-    @JoinColumn(name = "id_viaggio")
-    private List<Prenotazioni> listaPrenotazione;
+    @ManyToOne
+    @JoinColumn(name = "dipendente_id")
+    private Dipendente dipendente;
+
 
 }

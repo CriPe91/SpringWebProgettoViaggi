@@ -1,14 +1,14 @@
 package com.example.SpringWebProgetto.dto;
 
+import com.example.SpringWebProgetto.entity.Prenotazioni;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.URL;
 
-@NoArgsConstructor
+
 @Data
 public class DipendenteDTO {
 
@@ -30,6 +30,7 @@ public class DipendenteDTO {
     @Email(message = "L'indirizzo mail non è valido")
     private String email;
 
-    @URL(protocol ="http", message="Immagine non disponibile" )
+    @URL(protocol ="https", message="Immagine non disponibile" )
     private String imgProfilo;
+
 }

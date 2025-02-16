@@ -15,11 +15,19 @@ import java.time.LocalDate;
 public class Prenotazioni {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long idPrenotazione;
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "dipendente_id")
+    private Dipendente dipendente;
+    @ManyToOne
+    @JoinColumn(name = "viaggio_id")
+    private Viaggio viaggio;
 
     @Column(nullable = false)
-    private LocalDate dataRichiestaPrenotazione;
+    private LocalDate data;
     private String notePreferenzeDipendente;
+
 
 
 }
